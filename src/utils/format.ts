@@ -9,11 +9,13 @@ export function formatTime(iso: string): string {
 }
 
 /**
- * Build a `https://wa.me/<number>` deep link. Strips non-digits from the number
- * (so `+1 (555) 010` works) and URL-encodes the optional pre-filled message.
+ * Build a `https://wa.me/<number>` deep link. Strips non-digits (so
+ * `+1 (555) 010` works) and a leading `00` international trunk prefix, then
+ * URL-encodes the optional pre-filled message.
  */
 export function whatsappHref(phone: string, message?: string): string {
-  const digits = phone.replace(/[^\d]/g, '');
+  // Country codes never start with 0, so a leading `00` is always a dial prefix.
+  const digits = phone.replace(/[^\d]/g, '').replace(/^00/, '');
   const text = message ? `?text=${encodeURIComponent(message)}` : '';
   return `https://wa.me/${digits}${text}`;
 }

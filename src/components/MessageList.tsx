@@ -45,7 +45,12 @@ export function MessageList({
                     >
                       <span className="rfc-chip__icon">{getIcon('search', icons)}</span>
                       <span className="rfc-chip__text">{item.question}</span>
-                      {item.category && <span className="rfc-chip__cat">{item.category}</span>}
+                      {item.category && (
+                        <span className="rfc-chip__cat">
+                          <span className="rfc-visually-hidden">Category: </span>
+                          {item.category}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -77,6 +82,9 @@ export function MessageList({
                         {channel.icon ?? getIcon(iconNameForChannel(channel), icons)}
                       </span>
                       {channel.label}
+                      {(channel.type === 'whatsapp' || channel.type === 'link') && (
+                        <span className="rfc-visually-hidden"> (opens in a new tab)</span>
+                      )}
                     </a>
                   ))}
                 </div>
