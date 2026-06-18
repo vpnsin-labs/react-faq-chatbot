@@ -4,6 +4,8 @@ A small, **framework-agnostic FAQ support chatbot** widget for React. Works in
 **Vite**, **Next.js**, **CRA**, Remix, Astro — anywhere React 16.8+ runs.
 
 - 🔎 **Smart FAQ search** — token + synonym matching with confidence scoring (no exact-match brittleness).
+- 🏷️ **Portal presets** — one prop tunes labels, accent and quick topics for `support`, `ecommerce`, `saas`, `healthcare`, `education`, `realestate` or `hospitality`.
+- 💬 **WhatsApp chat** — opt-in deep link as a panel CTA, a standalone launcher and/or a handoff channel.
 - 🤖 **Optional pluggable AI fallback** — bring your own LLM/backend; used only when no FAQ matches.
 - 🎨 **Themeable, self-contained CSS** — one stylesheet, theme via CSS variables. No Tailwind required.
 - 🪶 **Zero icon-library dependency** — ships tiny inline SVGs (override any of them).
@@ -39,6 +41,49 @@ That's it — a floating launcher appears bottom-right.
 
 > **Next.js:** the widget uses browser APIs, so render it from a Client
 > Component (`"use client"`). See [`examples/nextjs-app.tsx`](./examples/nextjs-app.tsx).
+
+---
+
+## Portal presets
+
+Tailor the widget to a portal type with a single `preset` prop. Each preset
+seeds **tuned default labels, an accent theme and starter quick topics** for that
+domain — and **every piece stays overridable** (any `labels`, `theme` or
+`quickTopics` you pass wins over the preset).
+
+```tsx
+<Chatbot faqs={faqs} preset="ecommerce" />
+// → "Store Help", orange accent, topics: Track my order / Returns & refunds / …
+
+<Chatbot
+  faqs={faqs}
+  preset="healthcare"
+  labels={{ title: 'Acme Clinic' }} // override just the title; keep the rest
+/>
+```
+
+Available presets: `support` · `ecommerce` · `saas` · `healthcare` · `education`
+· `realestate` · `hospitality`. Read or extend them via the exported
+`PORTAL_PRESETS` map.
+
+### Organising a large knowledge base
+
+`FAQItem` accepts two optional fields for portals with big or jargon-heavy FAQs:
+
+```tsx
+const faqs = [
+  {
+    id: 1,
+    question: 'How do I reset my password?',
+    answer: 'Use the “Forgot password” link on the sign-in page.',
+    category: 'Account', // shown as a tag on suggestions
+    keywords: ['login', 'credentials', 'cant sign in'], // extra search terms
+  },
+];
+```
+
+- **`category`** groups entries and renders as a small tag on the "did you mean" suggestions.
+- **`keywords`** are author-curated aliases (synonyms, product names, common misspellings) indexed at question weight, so users find the entry even when their words aren't in the question.
 
 ---
 
@@ -109,6 +154,34 @@ import { Chatbot, CONTACT_INTENT } from '@vpnsin-labs/react-faq-chatbot';
 />;
 ```
 
+## WhatsApp chat
+
+Let users continue in WhatsApp with the `whatsapp` prop. It builds a
+`https://wa.me/<number>` deep link (with an optional pre-filled message) and can
+surface in up to three places via `placement`:
+
+```tsx
+<Chatbot
+  faqs={faqs}
+  whatsapp={{
+    phone: '+1 555 010 2030',
+    message: 'Hi! I have a question about my order.',
+    label: 'Chat on WhatsApp', // optional button copy
+    placement: ['panel', 'launcher'], // default: "panel"
+  }}
+/>
+```
+
+| Placement    | Where it shows                                                             |
+| ------------ | -------------------------------------------------------------------------- |
+| `"panel"`    | a persistent "Chat on WhatsApp" button above the composer _(default)_      |
+| `"launcher"` | a standalone WhatsApp button stacked above the chat launcher               |
+| `"contact"`  | added as a channel in the human-handoff card (deduped if you add your own) |
+
+The button colour follows the `--rfc-whatsapp` token (WhatsApp green by
+default) — restyle it with `theme={{ whatsapp: '#128c7e' }}`. Clicks emit a
+`whatsapp_clicked` event via `onEvent`.
+
 ## Domain synonyms
 
 Improve recall for your jargon (merged over the built-in defaults):
@@ -124,26 +197,28 @@ Improve recall for your jargon (merged over the built-in defaults):
 
 ## Props
 
-| Prop                    | Type                                                 | Default          | Description                                                                                   |
-| ----------------------- | ---------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
-| `faqs`                  | `FAQItem[] \| () => FAQItem[] \| Promise<FAQItem[]>` | —                | **Required.** Knowledge base (array or async loader).                                         |
-| `aiAdapter`             | `AiAdapter`                                          | —                | Optional AI fallback when no FAQ matches.                                                     |
-| `synonyms`              | `Record<string,string[]>`                            | built-ins        | Domain vocabulary expansion.                                                                  |
-| `quickTopics`           | `QuickTopic[]`                                       | `[]`             | Starter chips on a fresh thread.                                                              |
-| `contactChannels`       | `ContactChannel[]`                                   | `[]`             | Human-handoff card links.                                                                     |
-| `labels`                | `Partial<ChatbotLabels>`                             | English defaults | Copy overrides.                                                                               |
-| `theme`                 | `ChatbotTheme`                                       | —                | `--rfc-*` CSS-variable overrides.                                                             |
-| `position`              | `"bottom-right" \| "bottom-left"`                    | `"bottom-right"` | Dock corner.                                                                                  |
-| `persistence`           | `"session" \| "local" \| "none"`                     | `"session"`      | Where to persist the thread.                                                                  |
-| `storageKey`            | `string`                                             | `"rfc.chat.v1"`  | Persistence key.                                                                              |
-| `defaultOpen`           | `boolean`                                            | `false`          | Start open.                                                                                   |
-| `open` / `onOpenChange` | `boolean` / `(b)=>void`                              | —                | Controlled open state.                                                                        |
-| `showLauncher`          | `boolean`                                            | `true`           | Render the floating button.                                                                   |
-| `typingDelayMs`         | `number`                                             | `600`            | Simulated reply delay.                                                                        |
-| `nudge`                 | `{ text; delayMs? } \| false`                        | —                | One-time welcome bubble.                                                                      |
-| `confidence`            | `{ answerCoverage?; suggestCount? }`                 | —                | Search resolver tuning.                                                                       |
-| `onEvent`               | `(e: ChatbotEvent) => void`                          | —                | Analytics hook (`open`, `message_sent`, `faq_answered`, `ai_answered`, `contact_clicked`, …). |
-| `icons`                 | `IconSet`                                            | inline SVGs      | Override any glyph.                                                                           |
+| Prop                    | Type                                                 | Default          | Description                                                                                                       |
+| ----------------------- | ---------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `faqs`                  | `FAQItem[] \| () => FAQItem[] \| Promise<FAQItem[]>` | —                | **Required.** Knowledge base (array or async loader).                                                             |
+| `preset`                | `PortalType`                                         | —                | Portal flavour seeding labels/theme/topics (e.g. `"ecommerce"`). Explicit props override it.                      |
+| `aiAdapter`             | `AiAdapter`                                          | —                | Optional AI fallback when no FAQ matches.                                                                         |
+| `synonyms`              | `Record<string,string[]>`                            | built-ins        | Domain vocabulary expansion.                                                                                      |
+| `quickTopics`           | `QuickTopic[]`                                       | preset / `[]`    | Starter chips on a fresh thread.                                                                                  |
+| `contactChannels`       | `ContactChannel[]`                                   | `[]`             | Human-handoff card links.                                                                                         |
+| `whatsapp`              | `WhatsAppConfig`                                     | —                | Enable WhatsApp chat (panel CTA, launcher and/or handoff channel).                                                |
+| `labels`                | `Partial<ChatbotLabels>`                             | English defaults | Copy overrides.                                                                                                   |
+| `theme`                 | `ChatbotTheme`                                       | —                | `--rfc-*` CSS-variable overrides.                                                                                 |
+| `position`              | `"bottom-right" \| "bottom-left"`                    | `"bottom-right"` | Dock corner.                                                                                                      |
+| `persistence`           | `"session" \| "local" \| "none"`                     | `"session"`      | Where to persist the thread.                                                                                      |
+| `storageKey`            | `string`                                             | `"rfc.chat.v1"`  | Persistence key.                                                                                                  |
+| `defaultOpen`           | `boolean`                                            | `false`          | Start open.                                                                                                       |
+| `open` / `onOpenChange` | `boolean` / `(b)=>void`                              | —                | Controlled open state.                                                                                            |
+| `showLauncher`          | `boolean`                                            | `true`           | Render the floating button.                                                                                       |
+| `typingDelayMs`         | `number`                                             | `600`            | Simulated reply delay.                                                                                            |
+| `nudge`                 | `{ text; delayMs? } \| false`                        | —                | One-time welcome bubble.                                                                                          |
+| `confidence`            | `{ answerCoverage?; suggestCount? }`                 | —                | Search resolver tuning.                                                                                           |
+| `onEvent`               | `(e: ChatbotEvent) => void`                          | —                | Analytics hook (`open`, `message_sent`, `faq_answered`, `ai_answered`, `contact_clicked`, `whatsapp_clicked`, …). |
+| `icons`                 | `IconSet`                                            | inline SVGs      | Override any glyph.                                                                                               |
 
 ---
 

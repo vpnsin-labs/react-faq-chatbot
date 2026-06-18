@@ -161,8 +161,11 @@ const indexOf = (item: FAQItem, synonyms: SynonymMap) => {
   }
   let idx = perMap.get(item);
   if (!idx) {
+    // Keywords are author-curated aliases — index them at question weight so a
+    // match counts as strongly as the question text itself.
+    const keywordTokens = item.keywords?.length ? tokenize(item.keywords.join(' ')) : [];
     idx = {
-      q: expand(tokenize(item.question), synonyms),
+      q: expand([...tokenize(item.question), ...keywordTokens], synonyms),
       a: new Set(tokenize(item.answer)),
     };
     perMap.set(item, idx);

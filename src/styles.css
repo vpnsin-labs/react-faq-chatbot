@@ -16,6 +16,7 @@
   --rfc-border: #e2e8f0;
   --rfc-agent-bubble: #f1f5f9;
   --rfc-user-bubble: var(--rfc-primary);
+  --rfc-whatsapp: #25d366;
   --rfc-radius: 16px;
   --rfc-font-family:
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -321,6 +322,22 @@
   width: 14px;
   height: 14px;
 }
+.rfc-chip__text {
+  flex: 1;
+  min-width: 0;
+}
+.rfc-chip__cat {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: var(--rfc-surface-muted);
+  border: 1px solid var(--rfc-border);
+  color: var(--rfc-muted-foreground);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
 
 /* ---------- Contact card ---------- */
 .rfc-contact__prompt {
@@ -474,6 +491,78 @@
 .rfc-send svg {
   width: 16px;
   height: 16px;
+}
+
+/* ---------- WhatsApp ---------- */
+/* Panel CTA: a persistent "Chat on WhatsApp" button above the composer. */
+.rfc-wa-cta-wrap {
+  padding: 10px 14px 0;
+  background: var(--rfc-surface);
+}
+.rfc-wa-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--rfc-whatsapp);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease;
+}
+.rfc-wa-cta:hover {
+  filter: brightness(0.96);
+}
+.rfc-wa-cta:focus-visible {
+  outline: 2px solid var(--rfc-whatsapp);
+  outline-offset: 2px;
+}
+.rfc-wa-cta__icon {
+  display: inline-flex;
+}
+.rfc-wa-cta__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Standalone launcher: a WhatsApp FAB stacked above the chat launcher. */
+.rfc-wa-launcher {
+  width: var(--rfc-launcher-size);
+  height: var(--rfc-launcher-size);
+  border-radius: 9999px;
+  background: var(--rfc-whatsapp);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.25),
+    0 8px 10px -6px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease;
+}
+.rfc-wa-launcher:hover {
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(0.97);
+}
+.rfc-wa-launcher:focus-visible {
+  outline: 2px solid var(--rfc-whatsapp);
+  outline-offset: 3px;
+}
+.rfc-wa-launcher__icon {
+  display: inline-flex;
+}
+.rfc-wa-launcher__icon svg {
+  width: 26px;
+  height: 26px;
 }
 
 /* ---------- Utilities ---------- */

@@ -1,0 +1,7 @@
+# Generated / not ours to format.
+dist
+coverage
+package-lock.json
+
+# release-please owns CHANGELOG.md (already excluded from markdownlint too).
+CHANGELOG.md

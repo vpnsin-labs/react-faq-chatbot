@@ -9,6 +9,17 @@ export interface FAQItem {
   id?: string | number;
   question: string;
   answer: string;
+  /**
+   * Optional grouping label (e.g. "Billing", "Shipping"). Lets portals with a
+   * large knowledge base organise entries; surfaced as a tag on suggestions.
+   */
+  category?: string;
+  /**
+   * Extra search terms — aliases, product names, common misspellings — that
+   * should match this entry even when they don't appear in the question.
+   * Weighted like question text by the resolver.
+   */
+  keywords?: string[];
 }
 
 /**
@@ -126,6 +137,35 @@ export interface ContactChannel {
   icon?: ReactNode;
 }
 
+/**
+ * Where to surface the WhatsApp entry point:
+ * - `panel`    — a persistent "Chat on WhatsApp" button inside the chat panel
+ * - `launcher` — a standalone WhatsApp button stacked beside the chat launcher
+ * - `contact`  — added as a channel in the human-handoff card
+ */
+export type WhatsAppPlacement = 'panel' | 'launcher' | 'contact';
+
+/**
+ * Opt-in WhatsApp chat. Builds a `https://wa.me/<number>` deep link so users can
+ * continue the conversation in WhatsApp. Colour follows the `--rfc-whatsapp`
+ * token (default WhatsApp green), themeable via the `theme` prop.
+ */
+export interface WhatsAppConfig {
+  /** Destination number in international format (digits; a leading `+` is fine). */
+  phone: string;
+  /** Pre-filled message text the user starts the WhatsApp chat with. */
+  message?: string;
+  /** Button copy. Default `"Chat on WhatsApp"`. */
+  label?: string;
+  /** Accessible label / tooltip for the standalone launcher button. */
+  launcherAriaLabel?: string;
+  /**
+   * Where to show WhatsApp — one placement or several. Default `"panel"`.
+   * @see WhatsAppPlacement
+   */
+  placement?: WhatsAppPlacement | WhatsAppPlacement[];
+}
+
 export interface ChatbotLabels {
   title: string;
   subtitle: string;
@@ -167,6 +207,8 @@ export interface ThemeTokens {
   border: string;
   agentBubble: string;
   userBubble: string;
+  /** Accent for WhatsApp buttons. Default WhatsApp green (#25d366). */
+  whatsapp: string;
   radius: string;
   fontFamily: string;
   launcherSize: string;
@@ -177,6 +219,27 @@ export interface ThemeTokens {
 
 export type ChatbotPosition = 'bottom-right' | 'bottom-left';
 
+/**
+ * Built-in portal flavours. Selecting one seeds tuned default labels, an accent
+ * theme and starter quick topics for that domain — every piece still overridable
+ * by the matching explicit prop.
+ */
+export type PortalType =
+  | 'support'
+  | 'ecommerce'
+  | 'saas'
+  | 'healthcare'
+  | 'education'
+  | 'realestate'
+  | 'hospitality';
+
+/** The defaults a {@link PortalType} contributes. Explicit props win over these. */
+export interface PortalPreset {
+  labels?: Partial<ChatbotLabels>;
+  theme?: ChatbotTheme;
+  quickTopics?: QuickTopic[];
+}
+
 export type ChatbotEvent =
   | { type: 'open' }
   | { type: 'close' }
@@ -186,6 +249,7 @@ export type ChatbotEvent =
   | { type: 'ai_answered'; text: string }
   | { type: 'contact_offered' }
   | { type: 'contact_clicked'; channel: ContactChannel }
+  | { type: 'whatsapp_clicked'; placement: WhatsAppPlacement }
   | { type: 'reset' }
   | { type: 'error'; error: unknown };
 
@@ -206,14 +270,22 @@ export interface IconSet {
 export interface ChatbotProps {
   /** The knowledge base (array or async loader). Required. */
   faqs: FAQSource;
+  /**
+   * Portal flavour. Seeds tuned default labels, accent theme and quick topics
+   * for the domain (e.g. `"ecommerce"`, `"healthcare"`). Any explicit prop you
+   * also pass (`labels`, `theme`, `quickTopics`) overrides the preset.
+   */
+  preset?: PortalType;
   /** Domain synonyms to widen search recall. Merged over the built-in defaults. */
   synonyms?: SynonymMap;
   /** Optional AI fallback when no FAQ matches. */
   aiAdapter?: AiAdapter;
-  /** Quick-topic chips shown on a fresh conversation. */
+  /** Quick-topic chips shown on a fresh conversation. Falls back to the preset's. */
   quickTopics?: QuickTopic[];
   /** Contact channels for the human handoff card. */
   contactChannels?: ContactChannel[];
+  /** Enable a WhatsApp chat entry point (panel CTA, launcher button and/or handoff channel). */
+  whatsapp?: WhatsAppConfig;
   /** Copy overrides (partial — unset fields use sensible English defaults). */
   labels?: Partial<ChatbotLabels>;
   /** Theme overrides written as `--rfc-*` CSS variables. */

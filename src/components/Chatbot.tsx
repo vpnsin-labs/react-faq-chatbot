@@ -5,11 +5,14 @@ import type {
   ChatbotProps,
   ChatbotTheme,
   ContactChannel,
+  WhatsAppPlacement,
 } from '../types';
 import { DEFAULT_SYNONYMS } from '../search/faqSearch';
+import { getPortalPreset } from '../presets';
 import { useChatbot } from '../hooks/useChatbot';
 import { ChatLauncher } from './ChatLauncher';
 import { ChatPanel } from './ChatPanel';
+import { WhatsAppButton } from './WhatsAppButton';
 
 const DEFAULT_LABELS: ChatbotLabels = {
   title: 'Support',
@@ -44,10 +47,12 @@ function themeToStyle(theme?: ChatbotTheme): CSSProperties {
 export function Chatbot(props: ChatbotProps) {
   const {
     faqs,
+    preset: presetType,
     synonyms: userSynonyms,
     aiAdapter,
-    quickTopics = [],
+    quickTopics: quickTopicsProp,
     contactChannels = [],
+    whatsapp,
     labels: labelOverrides,
     theme,
     position = 'bottom-right',
@@ -65,10 +70,45 @@ export function Chatbot(props: ChatbotProps) {
     className,
   } = props;
 
+  // Portal preset contributes defaults; explicit props always win over them.
+  const preset = useMemo(() => getPortalPreset(presetType), [presetType]);
+
   const labels = useMemo<ChatbotLabels>(
-    () => ({ ...DEFAULT_LABELS, ...labelOverrides }),
-    [labelOverrides]
+    () => ({ ...DEFAULT_LABELS, ...preset?.labels, ...labelOverrides }),
+    [preset, labelOverrides]
   );
+
+  // Theme: preset accent under explicit per-token overrides.
+  const mergedTheme = useMemo<ChatbotTheme | undefined>(
+    () => (preset?.theme || theme ? { ...preset?.theme, ...theme } : undefined),
+    [preset, theme]
+  );
+
+  // Quick topics: explicit prop wins; otherwise fall back to the preset's.
+  const quickTopics = quickTopicsProp ?? preset?.quickTopics ?? [];
+
+  // Normalise WhatsApp placements (default: panel CTA only).
+  const waPlacements = useMemo<Set<WhatsAppPlacement>>(() => {
+    if (!whatsapp) return new Set();
+    const p = whatsapp.placement ?? 'panel';
+    return new Set(Array.isArray(p) ? p : [p]);
+  }, [whatsapp]);
+
+  // When WhatsApp is offered as a handoff channel, add it to the contact card
+  // (unless the app already supplies its own WhatsApp channel).
+  const resolvedContactChannels = useMemo<ContactChannel[]>(() => {
+    if (!whatsapp || !waPlacements.has('contact')) return contactChannels;
+    if (contactChannels.some((c) => c.type === 'whatsapp')) return contactChannels;
+    return [
+      ...contactChannels,
+      {
+        type: 'whatsapp',
+        label: whatsapp.label ?? 'Chat on WhatsApp',
+        value: whatsapp.phone,
+        prefill: whatsapp.message,
+      },
+    ];
+  }, [contactChannels, whatsapp, waPlacements]);
 
   const synonyms = useMemo(
     () => (userSynonyms ? { ...DEFAULT_SYNONYMS, ...userSynonyms } : DEFAULT_SYNONYMS),
@@ -125,7 +165,12 @@ export function Chatbot(props: ChatbotProps) {
     [emit]
   );
 
-  const rootStyle = themeToStyle(theme);
+  const handleWhatsApp = useCallback(
+    (placement: WhatsAppPlacement) => emit({ type: 'whatsapp_clicked', placement }),
+    [emit]
+  );
+
+  const rootStyle = themeToStyle(mergedTheme);
 
   return (
     <div
@@ -138,10 +183,21 @@ export function Chatbot(props: ChatbotProps) {
           api={api}
           labels={labels}
           quickTopics={quickTopics}
-          contactChannels={contactChannels}
+          contactChannels={resolvedContactChannels}
+          whatsapp={whatsapp && waPlacements.has('panel') ? whatsapp : undefined}
           icons={icons}
           onClose={() => setOpen(false)}
           onContactClick={handleContactClick}
+          onWhatsApp={handleWhatsApp}
+        />
+      )}
+
+      {whatsapp && waPlacements.has('launcher') && !open && (
+        <WhatsAppButton
+          config={whatsapp}
+          variant="launcher"
+          icons={icons}
+          onActivate={handleWhatsApp}
         />
       )}
 
