@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.3](https://github.com/vpnsin-labs/react-faq-chatbot/compare/v0.1.2...v0.1.3) (2026-06-18)
+
+
+### Bug Fixes
+
+* restore build under TS 5.9 + add test suite & browser playground ([044a39e](https://github.com/vpnsin-labs/react-faq-chatbot/commit/044a39ef45cd24fda2a9894e20c88068a9637988))
+* restore build under TS 5.9, add Vitest suite + browser playground ([bc43e08](https://github.com/vpnsin-labs/react-faq-chatbot/commit/bc43e08c97f9a4291cde0ddba38063f0e8462a32))
+* review fixes for portal presets + WhatsApp (a11y, theme, types) ([4e15716](https://github.com/vpnsin-labs/react-faq-chatbot/commit/4e15716ed79ffe2f765002765d6883f4d693eae6))
+* review fixes for portal presets + WhatsApp (a11y, theme, types) ([2262efb](https://github.com/vpnsin-labs/react-faq-chatbot/commit/2262efb40b8348d89832216bf9b677182545d4bd))
+
 ## [0.1.2](https://github.com/vpnsin-labs/react-faq-chatbot/compare/v0.1.1...v0.1.2) (2026-06-18)
 
 
