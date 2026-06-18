@@ -1,8 +1,16 @@
 import type { ChatbotApi } from '../hooks/useChatbot';
-import type { ChatbotLabels, ContactChannel, IconSet, QuickTopic } from '../types';
+import type {
+  ChatbotLabels,
+  ContactChannel,
+  IconSet,
+  QuickTopic,
+  WhatsAppConfig,
+  WhatsAppPlacement,
+} from '../types';
 import { CONTACT_INTENT } from '../types';
 import { MessageList } from './MessageList';
 import { Composer } from './Composer';
+import { WhatsAppButton } from './WhatsAppButton';
 import { getIcon } from './icons';
 
 interface ChatPanelProps {
@@ -10,9 +18,12 @@ interface ChatPanelProps {
   labels: ChatbotLabels;
   quickTopics: QuickTopic[];
   contactChannels: ContactChannel[];
+  /** Shown as a CTA above the composer when WhatsApp `panel` placement is active. */
+  whatsapp?: WhatsAppConfig;
   icons?: IconSet;
   onClose: () => void;
   onContactClick: (channel: ContactChannel) => void;
+  onWhatsApp?: (placement: WhatsAppPlacement) => void;
 }
 
 export function ChatPanel({
@@ -20,9 +31,11 @@ export function ChatPanel({
   labels,
   quickTopics,
   contactChannels,
+  whatsapp,
   icons,
   onClose,
   onContactClick,
+  onWhatsApp,
 }: ChatPanelProps) {
   const { messages, isTyping, send, showContact, reset } = api;
   // Quick topics help users start — show only on a fresh thread.
@@ -105,6 +118,12 @@ export function ChatPanel({
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {whatsapp && (
+        <div className="rfc-wa-cta-wrap">
+          <WhatsAppButton config={whatsapp} variant="panel" icons={icons} onActivate={onWhatsApp} />
         </div>
       )}
 

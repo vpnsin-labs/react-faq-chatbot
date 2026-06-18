@@ -19,6 +19,9 @@ export {
 export { DefaultIcons, getIcon } from './components/icons';
 export type { IconName } from './components/icons';
 
+// Portal presets (read or extend the per-domain defaults)
+export { PORTAL_PRESETS, getPortalPreset } from './presets';
+
 // Constants
 export { CONTACT_INTENT } from './types';
 
@@ -41,6 +44,10 @@ export type {
   QuickTopic,
   ContactChannel,
   ContactChannelType,
+  WhatsAppConfig,
+  WhatsAppPlacement,
+  PortalType,
+  PortalPreset,
   ChatbotLabels,
   ChatbotTheme,
   ThemeTokens,

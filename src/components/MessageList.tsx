@@ -44,7 +44,8 @@ export function MessageList({
                       onClick={() => onSelectSuggestion(item)}
                     >
                       <span className="rfc-chip__icon">{getIcon('search', icons)}</span>
-                      {item.question}
+                      <span className="rfc-chip__text">{item.question}</span>
+                      {item.category && <span className="rfc-chip__cat">{item.category}</span>}
                     </button>
                   ))}
                 </div>
