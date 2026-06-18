@@ -1,16 +1,9 @@
 import type { ChatbotApi } from '../hooks/useChatbot';
-import type {
-  ChatbotLabels,
-  ContactChannel,
-  IconSet,
-  QuickTopic,
-  WhatsAppConfig,
-  WhatsAppPlacement,
-} from '../types';
+import type { ChatbotLabels, ContactChannel, IconSet, QuickTopic, WhatsAppConfig } from '../types';
 import { CONTACT_INTENT } from '../types';
 import { MessageList } from './MessageList';
 import { Composer } from './Composer';
-import { WhatsAppButton } from './WhatsAppButton';
+import { WhatsAppButton, type WhatsAppButtonPlacement } from './WhatsAppButton';
 import { getIcon } from './icons';
 
 interface ChatPanelProps {
@@ -23,7 +16,7 @@ interface ChatPanelProps {
   icons?: IconSet;
   onClose: () => void;
   onContactClick: (channel: ContactChannel) => void;
-  onWhatsApp?: (placement: WhatsAppPlacement) => void;
+  onWhatsApp?: (placement: WhatsAppButtonPlacement) => void;
 }
 
 export function ChatPanel({

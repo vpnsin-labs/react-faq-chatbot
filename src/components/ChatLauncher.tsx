@@ -21,8 +21,14 @@ export function ChatLauncher({
 }: ChatLauncherProps) {
   const [showNudge, setShowNudge] = useState(false);
 
+  // Depend on the primitive fields, not the `nudge` object identity, so passing
+  // an inline `nudge={{ text }}` (a fresh object each render) doesn't keep
+  // restarting the timer and prevent the bubble from ever appearing.
+  const nudgeText = nudge ? nudge.text : null;
+  const nudgeDelay = nudge ? (nudge.delayMs ?? 4000) : 4000;
+
   useEffect(() => {
-    if (!nudge || open) return;
+    if (nudgeText == null || open) return;
     if (typeof window === 'undefined') return;
     let dismissed = false;
     try {
@@ -31,9 +37,9 @@ export function ChatLauncher({
       /* storage unavailable */
     }
     if (dismissed) return;
-    const t = setTimeout(() => setShowNudge(true), nudge.delayMs ?? 4000);
+    const t = setTimeout(() => setShowNudge(true), nudgeDelay);
     return () => clearTimeout(t);
-  }, [nudge, open, nudgeStorageKey]);
+  }, [nudgeText, nudgeDelay, open, nudgeStorageKey]);
 
   const dismissNudge = () => {
     setShowNudge(false);

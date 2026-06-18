@@ -178,9 +178,10 @@ surface in up to three places via `placement`:
 | `"launcher"` | a standalone WhatsApp button stacked above the chat launcher               |
 | `"contact"`  | added as a channel in the human-handoff card (deduped if you add your own) |
 
-The button colour follows the `--rfc-whatsapp` token (WhatsApp green by
-default) — restyle it with `theme={{ whatsapp: '#128c7e' }}`. Clicks emit a
-`whatsapp_clicked` event via `onEvent`.
+The button colour follows the `--rfc-whatsapp` / `--rfc-whatsapp-foreground`
+tokens (an accessible green with white text by default, clearing WCAG AA). Use
+the classic brand green with `theme={{ whatsapp: '#25d366', whatsappForeground: '#05330f' }}`.
+Clicks emit a `whatsapp_clicked` event via `onEvent`.
 
 ## Domain synonyms
 

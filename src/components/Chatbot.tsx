@@ -5,6 +5,7 @@ import type {
   ChatbotProps,
   ChatbotTheme,
   ContactChannel,
+  QuickTopic,
   WhatsAppPlacement,
 } from '../types';
 import { DEFAULT_SYNONYMS } from '../search/faqSearch';
@@ -12,7 +13,7 @@ import { getPortalPreset } from '../presets';
 import { useChatbot } from '../hooks/useChatbot';
 import { ChatLauncher } from './ChatLauncher';
 import { ChatPanel } from './ChatPanel';
-import { WhatsAppButton } from './WhatsAppButton';
+import { WhatsAppButton, type WhatsAppButtonPlacement } from './WhatsAppButton';
 
 const DEFAULT_LABELS: ChatbotLabels = {
   title: 'Support',
@@ -31,6 +32,11 @@ const DEFAULT_LABELS: ChatbotLabels = {
 };
 
 const DEFAULT_STORAGE_KEY = 'rfc.chat.v1';
+
+// Stable empty-array identities so memos keyed on them don't churn each render
+// when the corresponding prop is omitted.
+const EMPTY_CHANNELS: ContactChannel[] = [];
+const EMPTY_TOPICS: QuickTopic[] = [];
 
 // camelCase token -> `--rfc-kebab-case` CSS variable.
 function themeToStyle(theme?: ChatbotTheme): CSSProperties {
@@ -51,7 +57,7 @@ export function Chatbot(props: ChatbotProps) {
     synonyms: userSynonyms,
     aiAdapter,
     quickTopics: quickTopicsProp,
-    contactChannels = [],
+    contactChannels = EMPTY_CHANNELS,
     whatsapp,
     labels: labelOverrides,
     theme,
@@ -78,14 +84,22 @@ export function Chatbot(props: ChatbotProps) {
     [preset, labelOverrides]
   );
 
-  // Theme: preset accent under explicit per-token overrides.
-  const mergedTheme = useMemo<ChatbotTheme | undefined>(
-    () => (preset?.theme || theme ? { ...preset?.theme, ...theme } : undefined),
-    [preset, theme]
-  );
+  // Theme: preset accent under explicit per-token overrides. Only defined
+  // override tokens are applied, so e.g. `theme={{ primary: undefined }}` (a
+  // conditional override) leaves the preset accent intact instead of clobbering it.
+  const mergedTheme = useMemo<ChatbotTheme | undefined>(() => {
+    const out: Record<string, string> = { ...preset?.theme };
+    for (const [key, value] of Object.entries(theme ?? {})) {
+      if (value != null) out[key] = value;
+    }
+    return Object.keys(out).length ? (out as ChatbotTheme) : undefined;
+  }, [preset, theme]);
 
   // Quick topics: explicit prop wins; otherwise fall back to the preset's.
-  const quickTopics = quickTopicsProp ?? preset?.quickTopics ?? [];
+  const quickTopics = useMemo<QuickTopic[]>(
+    () => quickTopicsProp ?? preset?.quickTopics ?? EMPTY_TOPICS,
+    [quickTopicsProp, preset]
+  );
 
   // Normalise WhatsApp placements (default: panel CTA only).
   const waPlacements = useMemo<Set<WhatsAppPlacement>>(() => {
@@ -166,11 +180,11 @@ export function Chatbot(props: ChatbotProps) {
   );
 
   const handleWhatsApp = useCallback(
-    (placement: WhatsAppPlacement) => emit({ type: 'whatsapp_clicked', placement }),
+    (placement: WhatsAppButtonPlacement) => emit({ type: 'whatsapp_clicked', placement }),
     [emit]
   );
 
-  const rootStyle = themeToStyle(mergedTheme);
+  const rootStyle = useMemo(() => themeToStyle(mergedTheme), [mergedTheme]);
 
   return (
     <div

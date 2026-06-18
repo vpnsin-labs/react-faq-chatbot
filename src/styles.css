@@ -16,7 +16,10 @@
   --rfc-border: #e2e8f0;
   --rfc-agent-bubble: #f1f5f9;
   --rfc-user-bubble: var(--rfc-primary);
-  --rfc-whatsapp: #25d366;
+  /* Accessible green (white text clears WCAG AA, ~5.2:1). Override both tokens to
+     restore the brand green, e.g. theme={{ whatsapp: '#25d366', whatsappForeground: '#05330f' }}. */
+  --rfc-whatsapp: #0b7d47;
+  --rfc-whatsapp-foreground: #ffffff;
   --rfc-radius: 16px;
   --rfc-font-family:
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -508,7 +511,7 @@
   padding: 10px 12px;
   border-radius: 10px;
   background: var(--rfc-whatsapp);
-  color: #ffffff;
+  color: var(--rfc-whatsapp-foreground);
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
@@ -537,7 +540,7 @@
   height: var(--rfc-launcher-size);
   border-radius: 9999px;
   background: var(--rfc-whatsapp);
-  color: #ffffff;
+  color: var(--rfc-whatsapp-foreground);
   display: inline-flex;
   align-items: center;
   justify-content: center;

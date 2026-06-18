@@ -4,7 +4,12 @@ import type { ReactNode } from 'react';
 // Knowledge base
 // ---------------------------------------------------------------------------
 
-/** A single FAQ entry. `id` is optional but recommended for stable React keys. */
+/**
+ * A single FAQ entry. `id` is optional but recommended for stable React keys.
+ * Treat items as immutable — the search index is memoised per item identity, so
+ * replace the object (don't mutate `question`/`answer`/`keywords` in place) to
+ * change its content.
+ */
 export interface FAQItem {
   id?: string | number;
   question: string;
@@ -207,8 +212,10 @@ export interface ThemeTokens {
   border: string;
   agentBubble: string;
   userBubble: string;
-  /** Accent for WhatsApp buttons. Default WhatsApp green (#25d366). */
+  /** Background for WhatsApp buttons. Default an accessible green (#0b7d47). */
   whatsapp: string;
+  /** Text/icon colour on WhatsApp buttons. Default white. */
+  whatsappForeground: string;
   radius: string;
   fontFamily: string;
   launcherSize: string;
@@ -249,7 +256,7 @@ export type ChatbotEvent =
   | { type: 'ai_answered'; text: string }
   | { type: 'contact_offered' }
   | { type: 'contact_clicked'; channel: ContactChannel }
-  | { type: 'whatsapp_clicked'; placement: WhatsAppPlacement }
+  | { type: 'whatsapp_clicked'; placement: Extract<WhatsAppPlacement, 'panel' | 'launcher'> }
   | { type: 'reset' }
   | { type: 'error'; error: unknown };
 
