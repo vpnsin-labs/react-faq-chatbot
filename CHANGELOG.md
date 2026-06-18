@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/vpnsin-labs/react-faq-chatbot/compare/v0.1.1...v0.1.2) (2026-06-18)
+
+
+### Features
+
+* portal presets, FAQ categories/keywords and WhatsApp chat ([6f3a26c](https://github.com/vpnsin-labs/react-faq-chatbot/commit/6f3a26cf88eec72ce54b85e877071e696596c040))
+
 ## [0.1.1](https://github.com/vpnsin-labs/react-faq-chatbot/compare/v0.1.0...v0.1.1) (2026-06-18)
 
 
