@@ -16,13 +16,13 @@
   ],
   "license": "MIT",
   "author": "vpnsin-labs",
-  "homepage": "https://github.com/vpnsin/react-faq-chatbot#readme",
+  "homepage": "https://github.com/vpnsin-labs/react-faq-chatbot#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vpnsin/react-faq-chatbot.git"
+    "url": "git+https://github.com/vpnsin-labs/react-faq-chatbot.git"
   },
   "bugs": {
-    "url": "https://github.com/vpnsin/react-faq-chatbot/issues"
+    "url": "https://github.com/vpnsin-labs/react-faq-chatbot/issues"
   },
   "type": "module",
   "sideEffects": [
