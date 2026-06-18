@@ -6,6 +6,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 6 breaks tsup's dts build (it sets baseUrl, which TS6 rejects
+      # as a hard error) and isn't supported by typescript-eslint 8 yet. Stay on
+      # 5.x until the build toolchain catches up; remove this to re-allow majors.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
     groups:
       # Keep the React runtime and its type packages in lockstep so major
       # bumps (e.g. 18 -> 19) land in one PR and never break peer resolution

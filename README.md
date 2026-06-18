@@ -236,6 +236,20 @@ const result = resolveFaqQuery('how do i pay', faqs); // answer | suggestions | 
 
 ---
 
+## Development
+
+```bash
+npm install
+npm test            # Vitest unit + component suite (search, presets, WhatsApp, UI)
+npm run build       # bundle to dist/ with tsup
+```
+
+For a real-browser visual check, the [`examples/playground`](./examples/playground)
+Vite app renders the widget against the built `dist/` (with an optional
+puppeteer screenshot driver). See its [README](./examples/playground/README.md).
+
+---
+
 ## License
 
 MIT © vpnsin-labs

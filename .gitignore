@@ -8,3 +8,5 @@ coverage
 .turbo
 *.tsbuildinfo
 temp/
+examples/playground/shots/
+examples/playground/package-lock.json
