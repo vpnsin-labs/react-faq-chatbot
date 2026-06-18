@@ -1,6 +1,6 @@
 {
   "name": "@vpnsin-labs/react-faq-chatbot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A framework-agnostic, themeable FAQ support chatbot widget for React, Vite and Next.js. Token + synonym search, optional pluggable AI fallback, zero icon-library dependency.",
   "keywords": [
     "react",
