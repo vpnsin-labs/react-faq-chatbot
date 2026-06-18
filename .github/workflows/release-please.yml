@@ -4,12 +4,12 @@ name: Release Please
 # updates CHANGELOG.md, creates a GitHub release + tag, and publishes to npm.
 # Publish is integrated here (rather than a separate `on: release` workflow)
 # because a release created by GITHUB_TOKEN does not trigger other workflows.
-# Requires an NPM_TOKEN repo secret (an npm automation token).
+# Requires an NPM_TOKEN secret (repo or org level) — an npm automation/granular token.
 #
 # Recovery: if the publish step fails (e.g. an expired NPM_TOKEN), rotate the
 # secret and re-trigger this workflow manually via the "Run workflow" button.
-# The release-please step is idempotent (no-op when release already exists) and
-# the publish step runs unconditionally on workflow_dispatch.
+# Both the release-please step and the publish step are idempotent: publish is
+# skipped when the version is already on the registry, so re-runs are safe no-ops.
 on:
   push:
     branches: [main]
@@ -19,6 +19,13 @@ permissions:
   contents: write
   pull-requests: write
   id-token: write # npm provenance
+
+# Serialise every publish-capable run (this workflow + the manual publish.yml)
+# through one queue so a manual publish can never race the auto publish and
+# double-publish the same version. Never cancel a run that may be mid-publish.
+concurrency:
+  group: npm-publish-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   release-please:
@@ -54,8 +61,25 @@ jobs:
         if: ${{ steps.release.outputs.release_created || github.event_name == 'workflow_dispatch' }}
         run: npm run build --if-present
 
+      # Idempotent publish: npm rejects republishing an existing version with a
+      # "cannot publish over the previously published versions" 403. Treat ONLY
+      # that specific error as a green no-op, so a recovery re-run — or the loser
+      # of a concurrency race — passes instead of failing a successful release.
+      # Every other failure (bad/expired token, network, registry 5xx) still
+      # fails the run loudly. This is registry-truthful and avoids depending on a
+      # separate, eventually-consistent existence check.
       - name: Publish to npm
         if: ${{ steps.release.outputs.release_created || github.event_name == 'workflow_dispatch' }}
-        run: npm publish --provenance --access public
+        run: |
+          set +e
+          output=$(npm publish --provenance --access public 2>&1)
+          status=$?
+          echo "$output"
+          [ $status -eq 0 ] && exit 0
+          if echo "$output" | grep -qiE 'cannot publish over|EPUBLISHCONFLICT'; then
+            echo "::notice::Version already on the registry — idempotent no-op."
+            exit 0
+          fi
+          exit $status
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
