@@ -7,7 +7,17 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      # Batch low-risk updates into a single PR to cut noise.
+      # Keep the React runtime and its type packages in lockstep so major
+      # bumps (e.g. 18 -> 19) land in one PR and never break peer resolution
+      # between @types/react and @types/react-dom.
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+        update-types: [major, minor, patch]
+      # Batch remaining low-risk updates into a single PR to cut noise.
       minor-and-patch:
         update-types: [minor, patch]
 
