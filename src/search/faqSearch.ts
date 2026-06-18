@@ -226,8 +226,8 @@ export function searchFAQs(
  * most of the query AND clearly out-scores the runner-up.
  */
 export function isConfidentMatch(results: ScoredFAQ[], minCoverage = 0.6): boolean {
-  if (results.length === 0) return false;
   const [top, second] = results;
+  if (!top) return false;
   const dominant = !second || top.score >= second.score * 1.4;
   return top.coverage >= minCoverage && dominant;
 }
@@ -249,10 +249,11 @@ export function resolveFaqQuery(
   } = options;
 
   const results = searchFAQs(query, faqs, { limit, synonyms });
-  if (results.length === 0) return { type: 'none' };
+  const top = results[0];
+  if (!top) return { type: 'none' };
 
   if (isConfidentMatch(results, answerCoverage)) {
-    return { type: 'answer', item: results[0].item };
+    return { type: 'answer', item: top.item };
   }
   return {
     type: 'suggestions',
