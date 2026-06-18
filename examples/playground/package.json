@@ -1,0 +1,17 @@
+{
+  "name": "rfc-playground",
+  "private": true,
+  "type": "module",
+  "description": "Local visual/e2e harness for @vpnsin-labs/react-faq-chatbot (not published).",
+  "scripts": {
+    "dev": "vite",
+    "drive": "node drive.mjs"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.0",
+    "puppeteer-core": "^25.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "vite": "^8.0.0"
+  }
+}

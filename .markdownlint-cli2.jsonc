@@ -9,5 +9,5 @@
     "MD024": { "siblings_only": true }, // duplicate headings ok across sections
   },
   "globs": ["**/*.md"],
-  "ignores": ["node_modules", ".next", "dist", "build", "CHANGELOG.md", ".github/**/*.md"],
+  "ignores": ["**/node_modules", ".next", "dist", "build", "CHANGELOG.md", ".github/**/*.md"],
 }
