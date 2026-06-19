@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/vpnsin-labs/react-faq-chatbot/compare/v0.1.3...v0.1.4) (2026-06-19)
+
+
+### Features
+
+* add in-app navigation option for contact-channel links ([92f324f](https://github.com/vpnsin-labs/react-faq-chatbot/commit/92f324f56d504a4241948c443baa918117d06861))
+* in-app navigation option for contact-channel links ([5444ca0](https://github.com/vpnsin-labs/react-faq-chatbot/commit/5444ca0000d810f3bb5d7f45facdd2c80e366e5d))
+
 ## [0.1.3](https://github.com/vpnsin-labs/react-faq-chatbot/compare/v0.1.2...v0.1.3) (2026-06-18)
 
 
