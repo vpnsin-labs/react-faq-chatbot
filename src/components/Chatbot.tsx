@@ -72,6 +72,7 @@ export function Chatbot(props: ChatbotProps) {
     nudge,
     confidence,
     onEvent,
+    onContactNavigate,
     icons,
     className,
   } = props;
@@ -202,6 +203,7 @@ export function Chatbot(props: ChatbotProps) {
           icons={icons}
           onClose={() => setOpen(false)}
           onContactClick={handleContactClick}
+          onContactNavigate={onContactNavigate}
           onWhatsApp={handleWhatsApp}
         />
       )}

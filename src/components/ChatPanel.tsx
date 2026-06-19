@@ -1,5 +1,12 @@
 import type { ChatbotApi } from '../hooks/useChatbot';
-import type { ChatbotLabels, ContactChannel, IconSet, QuickTopic, WhatsAppConfig } from '../types';
+import type {
+  ChatbotLabels,
+  ContactChannel,
+  ContactNavigateHandler,
+  IconSet,
+  QuickTopic,
+  WhatsAppConfig,
+} from '../types';
 import { CONTACT_INTENT } from '../types';
 import { MessageList } from './MessageList';
 import { Composer } from './Composer';
@@ -16,6 +23,7 @@ interface ChatPanelProps {
   icons?: IconSet;
   onClose: () => void;
   onContactClick: (channel: ContactChannel) => void;
+  onContactNavigate?: ContactNavigateHandler;
   onWhatsApp?: (placement: WhatsAppButtonPlacement) => void;
 }
 
@@ -28,6 +36,7 @@ export function ChatPanel({
   icons,
   onClose,
   onContactClick,
+  onContactNavigate,
   onWhatsApp,
 }: ChatPanelProps) {
   const { messages, isTyping, send, showContact, reset } = api;
@@ -93,6 +102,7 @@ export function ChatPanel({
         icons={icons}
         onSelectSuggestion={(item) => send(item.question)}
         onContactClick={onContactClick}
+        onContactNavigate={onContactNavigate}
       />
 
       {isFresh && quickTopics.length > 0 && (
