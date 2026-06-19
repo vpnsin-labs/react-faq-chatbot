@@ -1,5 +1,12 @@
 import { useEffect, useRef } from 'react';
-import type { ChatbotLabels, ChatMessage, ContactChannel, FAQItem, IconSet } from '../types';
+import type {
+  ChatbotLabels,
+  ChatMessage,
+  ContactChannel,
+  ContactNavigateHandler,
+  FAQItem,
+  IconSet,
+} from '../types';
 import { getIcon } from './icons';
 import { contactHref, formatTime, iconNameForChannel } from '../utils/format';
 
@@ -11,6 +18,7 @@ interface MessageListProps {
   icons?: IconSet;
   onSelectSuggestion: (item: FAQItem) => void;
   onContactClick: (channel: ContactChannel) => void;
+  onContactNavigate?: ContactNavigateHandler;
 }
 
 export function MessageList({
@@ -21,6 +29,7 @@ export function MessageList({
   icons,
   onSelectSuggestion,
   onContactClick,
+  onContactNavigate,
 }: MessageListProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -65,28 +74,37 @@ export function MessageList({
               <div className="rfc-bubble rfc-bubble--agent rfc-bubble--card">
                 <p className="rfc-contact__prompt">{labels.contactPrompt}</p>
                 <div className="rfc-contact">
-                  {contactChannels.map((channel, i) => (
-                    <a
-                      key={`${message.id}-${i}`}
-                      className="rfc-contact__link"
-                      href={contactHref(channel)}
-                      target={
-                        channel.type === 'whatsapp' || channel.type === 'link'
-                          ? '_blank'
-                          : undefined
-                      }
-                      rel="noopener noreferrer"
-                      onClick={() => onContactClick(channel)}
-                    >
-                      <span className="rfc-contact__icon">
-                        {channel.icon ?? getIcon(iconNameForChannel(channel), icons)}
-                      </span>
-                      {channel.label}
-                      {(channel.type === 'whatsapp' || channel.type === 'link') && (
-                        <span className="rfc-visually-hidden"> (opens in a new tab)</span>
-                      )}
-                    </a>
-                  ))}
+                  {contactChannels.map((channel, i) => {
+                    // link/whatsapp open a new tab by default; a channel may opt
+                    // out with target:'_self' (e.g. to route in-app in an SPA).
+                    const target =
+                      channel.target ??
+                      (channel.type === 'whatsapp' || channel.type === 'link'
+                        ? '_blank'
+                        : undefined);
+                    const opensNewTab = target === '_blank';
+                    return (
+                      <a
+                        key={`${message.id}-${i}`}
+                        className="rfc-contact__link"
+                        href={contactHref(channel)}
+                        target={target}
+                        rel="noopener noreferrer"
+                        onClick={(event) => {
+                          onContactNavigate?.(channel, event);
+                          onContactClick(channel);
+                        }}
+                      >
+                        <span className="rfc-contact__icon">
+                          {channel.icon ?? getIcon(iconNameForChannel(channel), icons)}
+                        </span>
+                        {channel.label}
+                        {opensNewTab && (
+                          <span className="rfc-visually-hidden"> (opens in a new tab)</span>
+                        )}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             </div>

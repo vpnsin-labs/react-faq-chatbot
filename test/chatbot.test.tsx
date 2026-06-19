@@ -1,7 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Chatbot } from '../src/index';
+import type { MouseEvent } from 'react';
+import { Chatbot, CONTACT_INTENT } from '../src/index';
 import type { FAQItem } from '../src/types';
 
 const faqs: FAQItem[] = [
@@ -60,5 +61,35 @@ describe('<Chatbot>', () => {
     await user.type(screen.getByRole('textbox'), 'where is my package');
     await user.click(screen.getByRole('button', { name: /send message/i }));
     expect(await screen.findByText(/open my orders to see live tracking/i)).toBeInTheDocument();
+  });
+
+  it('opens a link contact channel in the same tab and fires onContactNavigate', async () => {
+    const user = userEvent.setup();
+    const onContactNavigate = vi.fn((_channel, event: MouseEvent<HTMLAnchorElement>) =>
+      event.preventDefault()
+    );
+    render(
+      <Chatbot
+        faqs={faqs}
+        persistence="none"
+        defaultOpen
+        typingDelayMs={0}
+        quickTopics={[{ label: 'Talk to a human', seed: CONTACT_INTENT }]}
+        contactChannels={[
+          { type: 'link', label: 'Contact support', value: '/support', target: '_self' },
+        ]}
+        onContactNavigate={onContactNavigate}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Talk to a human' }));
+    // target:'_self' => same-tab, so no "(opens in a new tab)" suffix in the name.
+    const link = await screen.findByRole('link', { name: 'Contact support' });
+    expect(link).toHaveAttribute('href', '/support');
+    expect(link).toHaveAttribute('target', '_self');
+    await user.click(link);
+    expect(onContactNavigate).toHaveBeenCalledWith(
+      expect.objectContaining({ value: '/support' }),
+      expect.anything()
+    );
   });
 });

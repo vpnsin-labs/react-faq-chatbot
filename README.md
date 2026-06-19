@@ -154,6 +154,28 @@ import { Chatbot, CONTACT_INTENT } from '@vpnsin-labs/react-faq-chatbot';
 />;
 ```
 
+By default `link` (and `whatsapp`) channels open in a **new tab**. In a single-page
+app you can keep the user in place — set `target: '_self'` on a `link` channel, and/or
+intercept the click with `onContactNavigate` to route via your own SPA router (call
+`event.preventDefault()` to take over navigation, so there's no reload and no new tab):
+
+```tsx
+import { useRouter } from 'next/navigation'; // or react-router's useNavigate
+
+const router = useRouter();
+
+<Chatbot
+  faqs={faqs}
+  contactChannels={[{ type: 'link', label: 'Contact support', value: '/support', target: '_self' }]}
+  onContactNavigate={(channel, event) => {
+    if (channel.type === 'link') {
+      event.preventDefault(); // cancel the default navigation…
+      router.push(channel.value); // …and route client-side instead
+    }
+  }}
+/>;
+```
+
 ## WhatsApp chat
 
 Let users continue in WhatsApp with the `whatsapp` prop. It builds a
@@ -205,7 +227,8 @@ Improve recall for your jargon (merged over the built-in defaults):
 | `aiAdapter`             | `AiAdapter`                                          | —                | Optional AI fallback when no FAQ matches.                                                                         |
 | `synonyms`              | `Record<string,string[]>`                            | built-ins        | Domain vocabulary expansion.                                                                                      |
 | `quickTopics`           | `QuickTopic[]`                                       | preset / `[]`    | Starter chips on a fresh thread.                                                                                  |
-| `contactChannels`       | `ContactChannel[]`                                   | `[]`             | Human-handoff card links.                                                                                         |
+| `contactChannels`       | `ContactChannel[]`                                   | `[]`             | Human-handoff card links. Each `link`/`whatsapp` opens a new tab unless `target: '_self'`.                        |
+| `onContactNavigate`     | `(channel, event) => void`                           | —                | Fires on a contact-link click before navigation; `event.preventDefault()` to route in-app yourself.               |
 | `whatsapp`              | `WhatsAppConfig`                                     | —                | Enable WhatsApp chat (panel CTA, launcher and/or handoff channel).                                                |
 | `labels`                | `Partial<ChatbotLabels>`                             | English defaults | Copy overrides.                                                                                                   |
 | `theme`                 | `ChatbotTheme`                                       | —                | `--rfc-*` CSS-variable overrides.                                                                                 |

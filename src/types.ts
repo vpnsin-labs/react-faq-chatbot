@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 
 // ---------------------------------------------------------------------------
 // Knowledge base
@@ -139,8 +139,26 @@ export interface ContactChannel {
   value: string;
   /** Optional pre-filled text for `whatsapp` / `email` channels. */
   prefill?: string;
+  /**
+   * Where the channel link opens. Defaults to `_blank` (new tab) for `link` and
+   * `whatsapp`, and the same tab for `email`/`phone`. Set `_self` on a `link`
+   * channel to navigate in place — e.g. to an in-app contact page in an SPA
+   * (pair with {@link ChatbotProps.onContactNavigate} for client-side routing
+   * without a full reload).
+   */
+  target?: '_blank' | '_self';
   icon?: ReactNode;
 }
+
+/**
+ * Click handler for a contact-channel link. Receives the channel and the
+ * originating click event, fired before the browser navigates — call
+ * `event.preventDefault()` to take over navigation yourself (e.g. SPA routing).
+ */
+export type ContactNavigateHandler = (
+  channel: ContactChannel,
+  event: ReactMouseEvent<HTMLAnchorElement>
+) => void;
 
 /**
  * Where to surface the WhatsApp entry point:
@@ -291,6 +309,13 @@ export interface ChatbotProps {
   quickTopics?: QuickTopic[];
   /** Contact channels for the human handoff card. */
   contactChannels?: ContactChannel[];
+  /**
+   * Called when a contact-channel link is clicked, with the originating click
+   * event — fired before the browser navigates. Call `event.preventDefault()` to
+   * take over navigation yourself (e.g. client-side routing to an in-app contact
+   * page via your SPA router) instead of the default anchor behaviour.
+   */
+  onContactNavigate?: ContactNavigateHandler;
   /** Enable a WhatsApp chat entry point (panel CTA, launcher button and/or handoff channel). */
   whatsapp?: WhatsAppConfig;
   /** Copy overrides (partial — unset fields use sensible English defaults). */
