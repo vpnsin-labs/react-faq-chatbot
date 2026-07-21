@@ -15,6 +15,21 @@ export {
   DEFAULT_SYNONYMS,
 } from './search/faqSearch';
 
+// Built-in AI provider adapters (Claude, Gemini, ChatGPT, Grok)
+export {
+  createAiAdapter,
+  createClaudeAdapter,
+  createGeminiAdapter,
+  createChatGptAdapter,
+  createOpenAiAdapter,
+  createGrokAdapter,
+  buildGroundingPrompt,
+  AiProviderError,
+  AI_NO_ANSWER,
+  DEFAULT_AI_MODELS,
+} from './aiProviders';
+export type { AiProviderName, AiProviderOptions, AiProviderConfig } from './aiProviders';
+
 // Icons (override or reuse)
 export { DefaultIcons, getIcon } from './components/icons';
 export type { IconName } from './components/icons';

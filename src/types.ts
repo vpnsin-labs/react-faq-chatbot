@@ -1,4 +1,5 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { AiProviderConfig } from './aiProviders';
 
 // ---------------------------------------------------------------------------
 // Knowledge base
@@ -305,6 +306,19 @@ export interface ChatbotProps {
   synonyms?: SynonymMap;
   /** Optional AI fallback when no FAQ matches. */
   aiAdapter?: AiAdapter;
+  /**
+   * Declarative alternative to `aiAdapter`: pick a built-in provider and pass
+   * its API key. Supported providers: `claude` (Anthropic), `gemini` (Google),
+   * `chatgpt` (OpenAI), `grok` (xAI).
+   *
+   *   <Chatbot faqs={faqs} ai={{ provider: 'claude', apiKey }} />
+   *
+   * Ignored when `aiAdapter` is also set (the explicit adapter wins). Treat the
+   * object as immutable — replace it to change configuration. ⚠ Shipping a raw
+   * key to the browser exposes it to visitors; see `AiProviderOptions` for the
+   * `baseUrl` proxy pattern and `dangerouslyAllowBrowser`.
+   */
+  ai?: AiProviderConfig;
   /** Quick-topic chips shown on a fresh conversation. Falls back to the preset's. */
   quickTopics?: QuickTopic[];
   /** Contact channels for the human handoff card. */
