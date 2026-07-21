@@ -9,6 +9,7 @@ import type {
   WhatsAppPlacement,
 } from '../types';
 import { DEFAULT_SYNONYMS } from '../search/faqSearch';
+import { createAiAdapter } from '../aiProviders';
 import { getPortalPreset } from '../presets';
 import { useChatbot } from '../hooks/useChatbot';
 import { ChatLauncher } from './ChatLauncher';
@@ -56,6 +57,7 @@ export function Chatbot(props: ChatbotProps) {
     preset: presetType,
     synonyms: userSynonyms,
     aiAdapter,
+    ai,
     quickTopics: quickTopicsProp,
     contactChannels = EMPTY_CHANNELS,
     whatsapp,
@@ -125,6 +127,13 @@ export function Chatbot(props: ChatbotProps) {
     ];
   }, [contactChannels, whatsapp, waPlacements]);
 
+  // An explicit `aiAdapter` wins; otherwise build one from the declarative
+  // `ai` provider config (memoised per config identity — treat it as immutable).
+  const resolvedAiAdapter = useMemo(
+    () => aiAdapter ?? (ai ? createAiAdapter(ai) : undefined),
+    [aiAdapter, ai]
+  );
+
   const synonyms = useMemo(
     () => (userSynonyms ? { ...DEFAULT_SYNONYMS, ...userSynonyms } : DEFAULT_SYNONYMS),
     [userSynonyms]
@@ -153,7 +162,7 @@ export function Chatbot(props: ChatbotProps) {
   const api = useChatbot({
     faqs,
     synonyms,
-    aiAdapter,
+    aiAdapter: resolvedAiAdapter,
     greeting: labels.greeting,
     suggestionsPrompt: labels.suggestionsPrompt,
     noMatch: labels.noMatch,
