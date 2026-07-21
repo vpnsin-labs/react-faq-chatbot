@@ -6,7 +6,7 @@ A small, **framework-agnostic FAQ support chatbot** widget for React. Works in
 - 🔎 **Smart FAQ search** — token + synonym matching with confidence scoring (no exact-match brittleness).
 - 🏷️ **Portal presets** — one prop tunes labels, accent and quick topics for `support`, `ecommerce`, `saas`, `healthcare`, `education`, `realestate` or `hospitality`.
 - 💬 **WhatsApp chat** — opt-in deep link as a panel CTA, a standalone launcher and/or a handoff channel.
-- 🤖 **Optional pluggable AI fallback** — bring your own LLM/backend; used only when no FAQ matches.
+- 🤖 **Optional AI fallback** — built-in adapters for Claude, Gemini, ChatGPT and Grok (bring your API key), or plug in your own LLM/backend; used only when no FAQ matches.
 - 🎨 **Themeable, self-contained CSS** — one stylesheet, theme via CSS variables. No Tailwind required.
 - 🪶 **Zero icon-library dependency** — ships tiny inline SVGs (override any of them).
 - ♿ **Accessible** — dialog semantics, `aria-live` log, focus rings, reduced-motion, ESC to close.
@@ -132,6 +132,57 @@ const aiAdapter: AiAdapter = async ({ message, history, faqContext }) => {
 ground the model (RAG-style). If `aiAdapter` is omitted, the widget is pure
 search + contact handoff (no backend needed).
 
+### Built-in providers (Claude, Gemini, ChatGPT, Grok)
+
+Don't want to write an adapter? Pick a provider and pass its API key — the
+widget ships ready-made adapters for Anthropic Claude, Google Gemini, OpenAI
+ChatGPT and xAI Grok. The model is grounded in your FAQ context automatically
+and hands off to the contact card when it can't answer.
+
+```tsx
+// Declarative — pick a provider on the component:
+<Chatbot faqs={faqs} ai={{ provider: 'claude', apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY }} />
+```
+
+```tsx
+// Or create the adapter yourself (same options, more control):
+import {
+  createClaudeAdapter, // Anthropic — claude-* models
+  createGeminiAdapter, // Google — gemini-* models
+  createChatGptAdapter, // OpenAI — gpt-* models (alias: createOpenAiAdapter)
+  createGrokAdapter, // xAI — grok-* models
+} from '@vpnsin-labs/react-faq-chatbot';
+
+const aiAdapter = createGeminiAdapter({
+  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
+  model: 'gemini-2.5-flash', // optional — sensible default per provider
+  maxTokens: 400,
+  temperature: 0.2,
+});
+
+<Chatbot faqs={faqs} aiAdapter={aiAdapter} />;
+```
+
+Every factory accepts the same options: `apiKey`, `model`, `baseUrl`,
+`maxTokens`, `temperature`, `systemPrompt` (string or builder function),
+`headers`, `fetchFn`, `timeoutMs` and `dangerouslyAllowBrowser`.
+
+> ⚠️ **Keep keys off the client in production.** A key bundled into browser
+> code is visible to every visitor. The adapters log a warning when used in a
+> browser unless you opt in with `dangerouslyAllowBrowser: true` — prototypes
+> and internal tools only. For production, deploy a tiny proxy that holds the
+> key server-side and point the adapter at it:
+>
+> ```tsx
+> const aiAdapter = createClaudeAdapter({
+>   apiKey: '', // injected by your proxy — never shipped to the client
+>   baseUrl: 'https://your-app.example.com/api/ai', // forwards to api.anthropic.com
+> });
+> ```
+>
+> Provider request paths (e.g. `/v1/messages`, `/v1/chat/completions`) are
+> appended to `baseUrl`, so a pass-through route is all you need.
+
 ---
 
 ## Quick topics & contact handoff
@@ -225,6 +276,7 @@ Improve recall for your jargon (merged over the built-in defaults):
 | `faqs`                  | `FAQItem[] \| () => FAQItem[] \| Promise<FAQItem[]>` | —                | **Required.** Knowledge base (array or async loader).                                                             |
 | `preset`                | `PortalType`                                         | —                | Portal flavour seeding labels/theme/topics (e.g. `"ecommerce"`). Explicit props override it.                      |
 | `aiAdapter`             | `AiAdapter`                                          | —                | Optional AI fallback when no FAQ matches.                                                                         |
+| `ai`                    | `AiProviderConfig`                                   | —                | Built-in AI fallback: `{ provider: 'claude' \| 'gemini' \| 'chatgpt' \| 'grok', apiKey, … }`. `aiAdapter` wins.   |
 | `synonyms`              | `Record<string,string[]>`                            | built-ins        | Domain vocabulary expansion.                                                                                      |
 | `quickTopics`           | `QuickTopic[]`                                       | preset / `[]`    | Starter chips on a fresh thread.                                                                                  |
 | `contactChannels`       | `ContactChannel[]`                                   | `[]`             | Human-handoff card links. Each `link`/`whatsapp` opens a new tab unless `target: '_self'`.                        |
